@@ -1,0 +1,46 @@
+{
+  "name": "@multiple-transaction-manager/mssql",
+  "version": "1.0.1",
+  "description": "Multiple Transaction Manager MS SQL adapter",
+  "main": "MSSQLAdapter.js",
+  "types": "MSSQLAdapter.d.ts",
+  "files": [
+    "/dist"
+  ],
+  "scripts": {
+    "compile": "tsc",
+    "test": "jest"
+  },
+  "repository": {
+    "type": "git",
+    "url": "github.com"
+  },
+  "keywords": [
+    "multiple",
+    "transaction",
+    "manager",
+    "db",
+    "database",
+    "mssql",
+    "MS SQL"
+  ],
+  "author": "Kemal Kaplan",
+  "license": "MIT",
+  "dependencies": {
+    "@log4js-node/log4js-api": "1.0.2",
+    "mssql": "8.1.0",
+    "@types/mssql": "7.1.5",
+    "multiple-transaction-manager": "file:../mtxn/dist/multiple-transaction-manager-1.0.1.tgz",
+    "uuid": "8.3.2",
+    "@types/uuid": "8.3.4"
+  },
+  "devDependencies": {
+    "@types/jest": "^27.5.0",
+    "@types/node": "^17.0.31",
+    "jest": "^28.1.0",
+    "ts-jest": "^28.0.1",
+    "tsc-hooks": "^1.1.1",
+    "typescript": "^4.6.4",
+    "log4js": "6.4.6"
+  }
+}
