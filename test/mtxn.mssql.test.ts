@@ -119,11 +119,11 @@ describe("Multiple transaction manager mssql workflow test...", () => {
 
 
         // Add control step
-        mssqlContext.addTask(txnMngr, "SELECT * FROM test_table");
+        const controlTask = mssqlContext.addTask(txnMngr, "SELECT * FROM test_table");
 
-        const tasks: Task[] = await txnMngr.exec();
+        await txnMngr.exec();
 
-        expect(tasks[2].getResult().recordset[0]["Name"]).toEqual("Stuart");
+        expect(controlTask.getResult().recordset[0]["Name"]).toEqual("Stuart");
 
     });
 

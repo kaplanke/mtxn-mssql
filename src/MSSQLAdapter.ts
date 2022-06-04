@@ -86,15 +86,17 @@ export class MssqlDBContext implements Context {
         return this.txn;
     }
 
-    addTask(txnMngr: MultiTxnMngr, querySql: string, params?: any | undefined) {
+    addTask(txnMngr: MultiTxnMngr, querySql: string, params?: any | undefined) :Task {
         const task = new MssqlDBTask(this, querySql, params, undefined);
         txnMngr.addTask(task);
+        return task;
     }
 
     addFunctionTask(txnMngr: MultiTxnMngr,
-        execFunc: ((txn: Transaction, task: Task) => Promise<IResult<any> | undefined>) | undefined) {
+        execFunc: ((txn: Transaction, task: Task) => Promise<IResult<any> | undefined>) | undefined) :Task {
         const task = new MssqlDBTask(this, "", undefined, execFunc);
         txnMngr.addTask(task);
+        return task;
     }
 }
 
