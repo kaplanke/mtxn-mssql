@@ -14,7 +14,7 @@ log4js.configure({
 
 const pool = new ConnectionPool({
     user: "sa",
-    password: "1Q2w3e4r!",
+    password: "changeme",
     database: "mtxnmngr",
     server: 'localhost',
     pool: {
