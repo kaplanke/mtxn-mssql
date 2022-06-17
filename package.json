@@ -26,9 +26,9 @@
   "dependencies": {
     "@log4js-node/log4js-api": "1.0.2",
     "multiple-transaction-manager": "file:../mtxn/dist/multiple-transaction-manager-1.0.1.tgz",
-    "mssql": "8.1.0",
+    "mssql": "^8.1.0",
     "uuid": "8.3.2",
-    "@types/mssql": "7.1.5",
+    "@types/mssql": "^7.1.5",
     "@types/uuid": "8.3.4"
   },
   "devDependencies": {
