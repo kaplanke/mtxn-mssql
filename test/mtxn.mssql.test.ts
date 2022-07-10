@@ -1,7 +1,7 @@
+import { afterAll, beforeAll, describe, expect, test } from '@jest/globals';
 import log4js from "log4js";
 import { ConnectionPool, IResult, TYPES } from "mssql";
-import { MultiTxnMngr, FunctionContext, Task } from "multiple-transaction-manager";
-import { describe, test, beforeAll, expect, afterAll } from '@jest/globals';
+import { FunctionContext, MultiTxnMngr } from "multiple-transaction-manager";
 import { MssqlDBContext } from "../src/index";
 
 log4js.configure({
@@ -51,10 +51,10 @@ describe("Multiple transaction manager mssql workflow test...", () => {
 
         // Add third step
         FunctionContext.addTask(txnMngr,
-            (task) => { return new Promise((resolve, reject) => { console.log("All done."); resolve(task); }); },
+            (task) => { return new Promise((resolve, _) => { console.log("All done."); resolve(task); }); },
             null, // optional params
-            (task) => { return new Promise((resolve, reject) => { console.log("Committing..."); resolve(task); }); },
-            (task) => { return new Promise((resolve, reject) => { console.log("Rolling back..."); resolve(task); }); }
+            (task) => { return new Promise((resolve, _) => { console.log("Committing..."); resolve(task); }); },
+            (task) => { return new Promise((resolve, _) => { console.log("Rolling back..."); resolve(task); }); }
         );
 
 
@@ -81,7 +81,7 @@ describe("Multiple transaction manager mssql workflow test...", () => {
 
         // Add last step -> should not execute
         FunctionContext.addTask(txnMngr,
-            (task) => { return new Promise((resolve, reject) => { console.log("Face the thing that should not be..."); resolve(task); }); },
+            (task) => { return new Promise((resolve, _reject) => { console.log("Face the thing that should not be..."); resolve(task); }); },
             null, // optional params
             (task) => Promise.resolve(task),
             (task) => Promise.resolve(task)
@@ -105,8 +105,8 @@ describe("Multiple transaction manager mssql workflow test...", () => {
 
         // Add second step
         mssqlContext.addFunctionTask(txnMngr,
-            (txn, task) => {
-                return new Promise<IResult<any> | undefined>((resolve, reject) => {
+            (txn, _task) => {
+                return new Promise<IResult<unknown> | undefined>((resolve, reject) => {
                     txn.request().query("INSERT INTO test_table(id, name) VALUES (1, 'Stuart')", (err, result) => {
                         if (err) {
                             reject(err);

@@ -86,14 +86,14 @@ export class MssqlDBContext implements Context {
         return this.txn;
     }
 
-    addTask(txnMngr: MultiTxnMngr, querySql: string, params?: any | undefined) :Task {
+    addTask(txnMngr: MultiTxnMngr, querySql: string, params?: unknown | undefined) :Task {
         const task = new MssqlDBTask(this, querySql, params, undefined);
         txnMngr.addTask(task);
         return task;
     }
 
     addFunctionTask(txnMngr: MultiTxnMngr,
-        execFunc: ((txn: Transaction, task: Task) => Promise<IResult<any> | undefined>) | undefined) :Task {
+        execFunc: ((txn: Transaction, task: Task) => Promise<IResult<unknown> | undefined>) | undefined) :Task {
         const task = new MssqlDBTask(this, "", undefined, execFunc);
         txnMngr.addTask(task);
         return task;
@@ -101,16 +101,16 @@ export class MssqlDBContext implements Context {
 }
 
 export class MssqlDBTask implements Task {
-    params: any;
+    params: unknown;
     context: MssqlDBContext;
     querySql: string;
-    rs: IResult<any> | undefined;
-    execFunc: ((txn: Transaction, task: Task) => Promise<IResult<any> | undefined>) | undefined;
+    rs: IResult<unknown> | undefined;
+    execFunc: ((txn: Transaction, task: Task) => Promise<IResult<unknown> | undefined>) | undefined;
 
     constructor(context: MssqlDBContext,
         querySql: string,
-        params: any,
-        execFunc: ((txn: Transaction, task: Task) => Promise<IResult<any> | undefined>) | undefined) {
+        params: unknown,
+        execFunc: ((txn: Transaction, task: Task) => Promise<IResult<unknown> | undefined>) | undefined) {
         this.context = context;
         this.querySql = querySql;
         if (params)
@@ -119,7 +119,7 @@ export class MssqlDBTask implements Task {
             this.execFunc = execFunc;
     }
     
-    getResult(): IResult<any> | undefined {
+    getResult(): IResult<unknown> | undefined {
         return this.rs;
     }
 
@@ -129,7 +129,7 @@ export class MssqlDBTask implements Task {
 
     exec(): Promise<Task> {
         return new Promise<Task>((resolveTask, rejectTask) => {
-            let params: any;
+            let params: unknown;
             if (this.params) {
                 if (this.params instanceof Function)
                     params = this.params();
@@ -145,8 +145,8 @@ export class MssqlDBTask implements Task {
                 });
             } else {
                 const request = this.getContext().getTransaction().request();
-                if (params) {
-                    params.forEach((element: [string, ISqlType, any]) => {
+                if (params && Array.isArray(params)) {
+                    (params as []).forEach((element: [string, ISqlType, unknown]) => {
                         request.input(...element);
                     });
                 }
@@ -162,7 +162,7 @@ export class MssqlDBTask implements Task {
         });
     }
 
-    setParams(params: any) {
+    setParams(params: unknown) {
         this.params = params;
     }
 
