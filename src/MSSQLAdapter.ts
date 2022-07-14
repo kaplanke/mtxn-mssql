@@ -5,13 +5,15 @@ import { v1 } from "uuid";
 
 export class MssqlDBContext implements Context {
 
+    txnMngr: MultiTxnMngr;
     connPool: ConnectionPool;
     txn: Transaction | undefined = undefined;
     contextId: string;
     isolationLevel: IIsolationLevel | undefined;
     logger = log4js.getLogger("MultiTxnMngr");
 
-    constructor(connPool: ConnectionPool, isolationLevel?: IIsolationLevel) {
+    constructor(txnMngr: MultiTxnMngr, connPool: ConnectionPool, isolationLevel?: IIsolationLevel) {
+        this.txnMngr = txnMngr;
         this.connPool = connPool;
         this.contextId = v1();
         this.isolationLevel = isolationLevel
@@ -86,16 +88,15 @@ export class MssqlDBContext implements Context {
         return this.txn;
     }
 
-    addTask(txnMngr: MultiTxnMngr, querySql: string, params?: unknown | undefined) :Task {
+    addTask(querySql: string, params?: unknown | undefined) :Task {
         const task = new MssqlDBTask(this, querySql, params, undefined);
-        txnMngr.addTask(task);
+        this.txnMngr.addTask(task);
         return task;
     }
 
-    addFunctionTask(txnMngr: MultiTxnMngr,
-        execFunc: ((txn: Transaction, task: Task) => Promise<IResult<unknown> | undefined>) | undefined) :Task {
+    addFunctionTask(execFunc: ((txn: Transaction, task: Task) => Promise<IResult<unknown> | undefined>) | undefined) :Task {
         const task = new MssqlDBTask(this, "", undefined, execFunc);
-        txnMngr.addTask(task);
+        this.txnMngr.addTask(task);
         return task;
     }
 }
@@ -119,7 +120,7 @@ export class MssqlDBTask implements Task {
             this.execFunc = execFunc;
     }
     
-    getResult(): IResult<unknown> | undefined {
+    getResult() {
         return this.rs;
     }
 

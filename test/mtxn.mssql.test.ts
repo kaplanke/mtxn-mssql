@@ -38,19 +38,19 @@ describe("Multiple transaction manager mssql workflow test...", () => {
 
     test("Success-commit case", async () => {
 
-        // init manager
+        // init manager & context
         const txnMngr: MultiTxnMngr = new MultiTxnMngr();
-
-        const mssqlContext = new MssqlDBContext(pool);
+        const mssqlContext = new MssqlDBContext(txnMngr, pool);
+        const functionContext = new FunctionContext(txnMngr);
 
         // Add first step
-        mssqlContext.addTask(txnMngr, "DELETE FROM test_table");
+        mssqlContext.addTask("DELETE FROM test_table");
 
         // Add second step
-        mssqlContext.addTask(txnMngr, "INSERT INTO test_table(id, name) VALUES (@id, @name)", [["id", TYPES.Numeric(38), 1], ["name", TYPES.VarChar(100), "Dave"]]);
+        mssqlContext.addTask("INSERT INTO test_table(id, name) VALUES (@id, @name)", [["id", TYPES.Numeric(38), 1], ["name", TYPES.VarChar(100), "Dave"]]);
 
         // Add third step
-        FunctionContext.addTask(txnMngr,
+        functionContext.addTask(
             (task) => { return new Promise((resolve, _) => { console.log("All done."); resolve(task); }); },
             null, // optional params
             (task) => { return new Promise((resolve, _) => { console.log("Committing..."); resolve(task); }); },
@@ -65,22 +65,22 @@ describe("Multiple transaction manager mssql workflow test...", () => {
 
     test("Fail-rollback case", async () => {
 
-        // init manager
+        // init manager & context
         const txnMngr: MultiTxnMngr = new MultiTxnMngr();
-
-        const mssqlContext = new MssqlDBContext(pool);
+        const mssqlContext = new MssqlDBContext(txnMngr, pool);
+        const functionContext = new FunctionContext(txnMngr);
 
         // Add first step
-        mssqlContext.addTask(txnMngr, "DELETE FROM test_table");
+        mssqlContext.addTask("DELETE FROM test_table");
 
         // Add second step
-        mssqlContext.addTask(txnMngr, "INSERT INTO test_table(id, name) VALUES (@id, @name)", [["id", TYPES.Numeric(38), 1], ["name", TYPES.VarChar(100), "Dave"]]);
+        mssqlContext.addTask("INSERT INTO test_table(id, name) VALUES (@id, @name)", [["id", TYPES.Numeric(38), 1], ["name", TYPES.VarChar(100), "Dave"]]);
 
         // Add third step -> Causes primary key violation
-        mssqlContext.addTask(txnMngr, "INSERT INTO test_table(id, name) VALUES (@id, @name)", [["id", TYPES.Numeric(38), 1], ["name", TYPES.VarChar(100), "Kevin"]]);
+        mssqlContext.addTask("INSERT INTO test_table(id, name) VALUES (@id, @name)", [["id", TYPES.Numeric(38), 1], ["name", TYPES.VarChar(100), "Kevin"]]);
 
         // Add last step -> should not execute
-        FunctionContext.addTask(txnMngr,
+        functionContext.addTask(
             (task) => { return new Promise((resolve, _reject) => { console.log("Face the thing that should not be..."); resolve(task); }); },
             null, // optional params
             (task) => Promise.resolve(task),
@@ -95,16 +95,15 @@ describe("Multiple transaction manager mssql workflow test...", () => {
 
     test("Function task example", async () => {
 
-        // init manager
+        // init manager & context
         const txnMngr: MultiTxnMngr = new MultiTxnMngr();
-
-        const mssqlContext = new MssqlDBContext(pool);
+        const mssqlContext = new MssqlDBContext(txnMngr, pool);
 
         // Add first step
-        mssqlContext.addTask(txnMngr, "DELETE FROM test_table");
+        mssqlContext.addTask("DELETE FROM test_table");
 
         // Add second step
-        mssqlContext.addFunctionTask(txnMngr,
+        mssqlContext.addFunctionTask(
             (txn, _task) => {
                 return new Promise<IResult<unknown> | undefined>((resolve, reject) => {
                     txn.request().query("INSERT INTO test_table(id, name) VALUES (1, 'Stuart')", (err, result) => {
@@ -119,7 +118,7 @@ describe("Multiple transaction manager mssql workflow test...", () => {
 
 
         // Add control step
-        const controlTask = mssqlContext.addTask(txnMngr, "SELECT * FROM test_table");
+        const controlTask = mssqlContext.addTask("SELECT * FROM test_table");
 
         await txnMngr.exec();
 
